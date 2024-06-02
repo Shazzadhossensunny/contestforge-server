@@ -3,7 +3,7 @@ const app = express()
 var cors = require("cors");
 var jwt = require("jsonwebtoken");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
 
@@ -69,10 +69,25 @@ async function run() {
       // };
 
     //  contest api
+
     app.post("/addContest", async(req, res)=>{
       const contest = req.body;
       const result = await contestCollection.insertOne(contest)
       res.send(result)
+    })
+
+    app.get("/addContest", async(req,res)=>{
+      const result = await contestCollection.find().toArray()
+      res.send(result)
+
+    })
+
+    app.get("/addContest/:id", async(req, res)=> {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await contestCollection.findOne(query)
+      res.send(result)
+
     })
 
 
