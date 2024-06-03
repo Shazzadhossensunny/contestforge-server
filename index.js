@@ -4,6 +4,7 @@ var cors = require("cors");
 var jwt = require("jsonwebtoken");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const port = process.env.PORT || 5000;
 
 
@@ -79,6 +80,15 @@ async function run() {
         }
         next();
       };
+      // search api
+      app.get('/search', async(req,res)=>{
+        const  searchTerm = req.query.q;
+        if(!searchTerm){
+          return res.status(400).json({ message: 'Search term is required' });
+        }
+        const result = await contestCollection.find({contestType:{$in:[searchTerm]}}).toArray()
+        res.send(result)
+      })
 
       // users api
       app.get("/users", async(req, res)=> {
@@ -165,6 +175,21 @@ async function run() {
       const result = await contestCollection.insertOne(contest)
       res.send(result)
     })
+
+    // payment intent
+    app.post("/create-payment-intent", async (req, res) => {
+      const { price } = req.body;
+      const amount = parseInt(price * 100);
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ["card"],
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
+
 
 
 
