@@ -85,6 +85,12 @@ async function run() {
         const result = await usersCollection.find().toArray()
         res.send(result);
       })
+       app.get("/user/:email", async(req, res)=>{
+        const email = req.params.email;
+        const result = await usersCollection.findOne({email})
+        res.send(result)
+       })
+
       app.post("/users", async (req, res) => {
         const user = req.body;
         const query = { email: user.email };
@@ -99,10 +105,31 @@ async function run() {
       app.patch("/user/:id", async(req, res)=>{
         const id = req.params.id;
         const {role} = req.body;
+
+      // Validate the role
+        // const allowedRoles = ['Admin', 'Creator', 'User'];
+        // if (!allowedRoles.includes(role)) {
+        //   return res.status(401).send({ error: 'Invalid role' });
+        // }
         const filter = {_id: new ObjectId(id)}
         const updateDoc = {
           $set:{
-            role :role
+            role :role,
+
+          }
+        }
+        const result = await usersCollection.updateOne(filter, updateDoc)
+        res.send(result)
+
+      })
+
+      app.patch("/user/status/:id", async(req, res)=>{
+        const id = req.params.id;
+        const {status} = req.body;
+        const filter = {_id: new ObjectId(id)}
+        const updateDoc = {
+          $set:{
+            status: status,
           }
         }
         const result = await usersCollection.updateOne(filter, updateDoc)
