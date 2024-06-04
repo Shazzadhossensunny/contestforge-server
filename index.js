@@ -170,6 +170,30 @@ async function run() {
 
     })
 
+    app.get('/createdContest/:email', async(req, res)=>{
+      const email = req.params.email;
+      const result = await contestCollection.find({email}).toArray()
+      res.send(result)
+    })
+
+    app.delete('/createdContest/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await contestCollection.deleteOne(query)
+      res.send(result)
+    })
+
+    app.patch('/createdContes/:id', async(req, res)=>{
+      const id = req.params.id;
+      const contest = req.body;
+      const filter = {_id: new ObjectId(id)}
+      const updateDoc = {
+        $set : {...contest}
+      }
+      const result = await contestCollection.updateOne(filter, updateDoc)
+      res.send(result)
+    })
+
     app.post("/addContest", async(req, res)=>{
       const contest = req.body;
       const result = await contestCollection.insertOne(contest)
