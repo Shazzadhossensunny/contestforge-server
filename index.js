@@ -175,6 +175,11 @@ async function run() {
       const result = await contestCollection.find({email}).toArray()
       res.send(result)
     })
+    app.post("/addContest", async(req, res)=>{
+      const contest = req.body;
+      const result = await contestCollection.insertOne(contest)
+      res.send(result)
+    })
 
     app.delete('/createdContest/:id', async(req, res)=>{
       const id = req.params.id;
@@ -194,11 +199,18 @@ async function run() {
       res.send(result)
     })
 
-    app.post("/addContest", async(req, res)=>{
-      const contest = req.body;
-      const result = await contestCollection.insertOne(contest)
+    app.patch('/status/:id', async(req, res)=>{
+      const id = req.params.id;
+      const status = req.body;
+      const filter = {_id: new ObjectId(id)}
+      const updateDoc = {
+        $set: {...status }
+      }
+      const result = await contestCollection.updateOne(filter, updateDoc)
       res.send(result)
     })
+
+
 
     // payment intent
     app.post("/create-payment-intent", async (req, res) => {
