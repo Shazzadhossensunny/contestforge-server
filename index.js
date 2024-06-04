@@ -209,6 +209,16 @@ async function run() {
       const result = await contestCollection.updateOne(filter, updateDoc)
       res.send(result)
     })
+    app.patch('/comment/:id', async(req, res)=>{
+      const id = req.params.id;
+      const comment = req.body;
+      const filter = {_id: new ObjectId(id)}
+      const updateDoc = {
+        $set: {...comment }
+      }
+      const result = await contestCollection.updateOne(filter, updateDoc)
+      res.send(result)
+    })
 
 
 
