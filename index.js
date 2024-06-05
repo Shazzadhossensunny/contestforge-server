@@ -256,11 +256,40 @@ async function run() {
       res.send(result)
     })
 
+    app.get("/contest-submissions/:name", async(req, res)=>{
+      const contestName = req.params.name;
+      const query = { contestName: contestName };
+      const result = await paymentCollection.find(query).toArray()
+      res.send(result)
+    })
+
     app.post("/payment", async(req,res)=>{
       const payment = req.body;
       const paymentResult = await paymentCollection.insertOne(payment);
       res.send(paymentResult)
     })
+
+    app.patch('/declare-winner/:id', async (req, res) => {
+      const { id } = req.params;
+      const { contestName } = req.body;
+
+
+        // Unset previous winners for this contest
+        await paymentCollection.updateMany(
+          { contestName },
+          { $set: { winner: false } }
+        );
+
+        // Set the new winner
+        const result = await paymentCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { winner: true } }
+        );
+
+          res.send(result);
+
+
+    });
 
 
 
