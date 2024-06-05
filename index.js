@@ -32,6 +32,7 @@ async function run() {
     await client.connect();
      const usersCollection = client.db('contestForgeDB').collection('users')
      const contestCollection = client.db('contestForgeDB').collection('contests')
+     const paymentCollection = client.db('contestForgeDB').collection('payments')
 
       // jwt api
     app.post("/jwt", async (req, res) => {
@@ -220,6 +221,15 @@ async function run() {
       res.send(result)
     })
 
+    app.patch('/participationCount/:id', async(req, res)=>{
+      const {id} = req.params;
+      const result = await contestCollection.updateOne(
+        {_id: new ObjectId(id)},
+        {$inc: { participationCount: 1}}
+      );
+      res.send(result)
+    })
+
 
 
     // payment intent
@@ -235,6 +245,12 @@ async function run() {
         clientSecret: paymentIntent.client_secret,
       });
     });
+
+    app.post("/payment", async(req,res)=>{
+      const payment = req.body;
+      const paymentResult = await paymentCollection.insertOne(payment);
+      res.send(paymentResult)
+    })
 
 
 
