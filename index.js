@@ -148,6 +148,17 @@ async function run() {
 
       })
 
+      app.patch('/update-profile/:email', async(req, res)=> {
+        const {email} = req.params;
+        const updateInfo = req.body;
+        const filter = {email : email}
+        const updateDoc = {
+          $set: {...updateInfo}
+        }
+        const result = await usersCollection.updateOne(filter, updateDoc)
+        res.send(result)
+      })
+
       app.delete("/users/:id", async(req, res)=> {
         const id = req.params.id;
         const query = {_id: new ObjectId(id)}
@@ -262,6 +273,16 @@ async function run() {
       const result = await paymentCollection.find(query).toArray()
       res.send(result)
     })
+//  contest winner percentage
+    app.get('/user-contests/:email', async (req, res) => {
+      const { email } = req.params;
+      const contests = await paymentCollection.find({ email }).toArray();
+      const totalContests = contests.length;
+      const wins = contests.filter(contest => contest.winner).length;
+      const winPercentage = totalContests > 0 ? (wins / totalContests) * 100 : 0;
+      res.send({ contests, winPercentage });
+
+    });
 
     app.post("/payment", async(req,res)=>{
       const payment = req.body;
