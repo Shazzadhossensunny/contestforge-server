@@ -347,6 +347,42 @@ async function run() {
       res.send(topCreators);
     });
 
+    // leaderBoard
+    app.get('/leaderboard', async (req, res) => {
+      try {
+        const winners = await paymentCollection.aggregate([
+          { $match: { winner: true } },
+          {
+            $group: {
+              _id: "$email",
+              winCount: { $sum: 1 },
+              details: { $first: { name: "$name", photo: "$photo", email: "$email" } }
+            }
+          },
+          { $sort: { winCount: -1 } },
+          { $limit: 10 }
+        ]).toArray();
+
+        const leaderboard = await Promise.all(winners.map(async (winner) => {
+          const userDetails = await usersCollection.findOne({ email: winner._id });
+          if (userDetails) {
+            return {
+              ...winner.details,
+              winCount: winner.winCount
+            };
+          }
+          return null;
+        }));
+
+        const validLeaderboard = leaderboard.filter(entry => entry !== null);
+
+        res.json(validLeaderboard);
+      } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    });
+
 
 
 
